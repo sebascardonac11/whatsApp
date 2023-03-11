@@ -20,6 +20,7 @@ module.exports = class whatsapp {
                     template: { "name": "bienvenida", "language": { "code": "es" } }
                 }
             }
+            console.log(params);
             return await axios(params);
         } catch (error) {
             console.log(error.response);
