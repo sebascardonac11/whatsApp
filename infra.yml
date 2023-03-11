@@ -1,0 +1,309 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  ## Whatsapp ##
+  LambdaFuncName:
+    Type: String
+    Default: cda-lambda-whatsapp
+  ApiPathName:
+    Type: String
+    Default: cda-Whatsapps
+Resources:
+################## Whatsapp ################
+  LambdaFunction:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Timeout: 10
+      Code:
+        ZipFile: |
+          console.log('Loading Whatsapp Lambda function');
+      FunctionName:
+        Ref: LambdaFuncName
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Role: 
+        Fn::ImportValue: cda-IAMRoleName
+    Metadata:
+      'AWS::CloudFormation::Designer':
+        id: 9dec56b7-939f-4bc7-9200-47da6127bfe1
+  APIGwResorceWhatsapps:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      ParentId: 
+        Fn::ImportValue: cda-ApiGwRestApiResource
+      PathPart:
+        Ref: ApiPathName
+  ApiGwWhatsappAny:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceWhatsapps
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGwResorceWhatsapps
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: cda-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      RequestParameters:
+        method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncWhatsappArn}/invocations
+          - LambdaFuncWhatsappArn: !GetAtt LambdaFunction.Arn  
+        RequestTemplates:
+          application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  ApiGwWhatsappOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceWhatsapps
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - ApiGwWhatsappAny   
+  APIGwResorceSessionIdWhatsappsAdd:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      ParentId: !Ref APIGwResorceWhatsapps
+      PathPart: '{fileName}'
+    DependsOn:
+      - APIGwResorceWhatsapps
+  ApiGwWhatsappIDPut:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceSessionIdWhatsappsAdd
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionIdWhatsappsAdd
+      HttpMethod: PUT
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: cda-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      RequestParameters:
+        method.request.path.proxy: true
+        method.request.path.fileName : true
+        method.request.header.tagging : false
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: PUT
+        Credentials:
+          Fn::ImportValue: cda-IAMRoleName
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:s3:path/cda/WhatsappClient/{fileName}
+          - LambdaFuncNameArn: !GetAtt LambdaFunction.Arn  
+        RequestParameters: 
+          integration.request.path.fileName : method.request.header.fileName
+          integration.request.header.x-amz-tagging : method.request.header.tagging
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200       
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true  
+  ApiGwWhatsappIDOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceSessionIdWhatsappsAdd
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - APIGwResorceSessionIdWhatsappsAdd   
+        - LambdaFunction
+  APIGwResorceWhatsappsPerson:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      ParentId: !Ref APIGwResorceWhatsapps
+      PathPart: 'person'
+    DependsOn:
+      - APIGwResorceWhatsapps
+  ApiGwWhatsappPersonAny:
+    Type: 'AWS::ApiGateway::Method'
+    DependsOn:
+      - APIGwResorceWhatsappsPerson
+      - LambdaFunction
+    Properties:
+      ResourceId: !Ref APIGwResorceWhatsappsPerson
+      HttpMethod: ANY
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: 
+        Fn::ImportValue: cda-APIGwAuthorizer
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      RequestParameters:
+        method.request.path.proxy: true
+      RequestModels :
+        application/json:     'Empty'
+        multipart/form-data:  'Empty'
+        image/jpeg:           'Empty'
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - >-
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFuncWhatsappArn}/invocations
+          - LambdaFuncWhatsappArn: !GetAtt LambdaFunction.Arn  
+        RequestTemplates:
+          application/json: $input.json('$')
+          multipart/form-data: $input.json('$')
+          image/jpeg: $input.json('$')
+        IntegrationResponses:
+          - StatusCode: 200
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseTemplates:
+              application/json: $input.json('$')          
+            ResponseParameters:
+                method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+                method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+  ApiGwWhatsappPersonOpt:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ResourceId: !Ref APIGwResorceWhatsappsPerson
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE      
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+      MethodResponses:
+        - StatusCode: 200
+          ResponseModels:
+            application/json: 'Empty'
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+    DependsOn:
+        - ApiGwWhatsappAny   
+  APIGatewayDeployment:
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      Description : 'Deploy Whatsapps'
+      RestApiId: 
+        Fn::ImportValue: cda-ApiGwRestApiID
+      StageName:
+        Fn::ImportValue: cda-Enviroment
+    DependsOn:
+      - ApiGwWhatsappAny
+      - ApiGwWhatsappIDPut
+      - ApiGwWhatsappPersonAny
+  APIGatewayPermission:
+    Type: 'AWS::Lambda::Permission'
+    Properties:
+      Action: 'lambda:InvokeFunction'
+      FunctionName: !GetAtt LambdaFunction.Arn
+      Principal: apigateway.amazonaws.com
+    DependsOn:
+      - APIGatewayDeployment

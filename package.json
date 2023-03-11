@@ -1,0 +1,26 @@
+{
+  "name": "whatsapp",
+  "version": "1.0.0",
+  "description": "Componente encargado de comunicarse con whatsapp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebascardonac11/whatsApp.git"
+  },
+  "keywords": [
+    "whatsapp"
+  ],
+  "author": "Sebastian Cardona Correa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sebascardonac11/whatsApp/issues"
+  },
+  "homepage": "https://github.com/sebascardonac11/whatsApp#readme",
+  "dependencies": {
+    "axios": "^1.3.2",
+    "facebook-nodejs-business-sdk": "^16.0.0"
+  }
+}
