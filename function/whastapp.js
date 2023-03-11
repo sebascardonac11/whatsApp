@@ -17,7 +17,7 @@ module.exports = class whatsapp {
                     messaging_product: 'whatsapp',
                     to:  number,
                     type: 'template',
-                    template: { "name": "hello_world", "language": { "code": "en_US" } }
+                    template: { "name": "bienvenida", "language": { "code": "es" } }
                 }
             }
             return await axios(params);
