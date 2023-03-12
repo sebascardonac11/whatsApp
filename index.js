@@ -1,7 +1,7 @@
 const Whatsapp = require('./function/whastapp')
 
 exports.handler = async function (event, context, callback) {
-
+    console.log(event);
     var whatsapp = new Whatsapp(process.env.TOKEN,process.env.WHATSAPPID);
     var response = await whatsapp.sendMsj('573147139879',"bienvenida");
     console.log(response);
