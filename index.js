@@ -12,6 +12,12 @@ exports.handler = async function (event, context, callback) {
             break;
         default:
         // code
+        this.response={
+            'hub.challenge': '1423162681',
+            'hub.mode': 'subscribe',
+            'hub.verify_token': 'metawhatsapp'
+          }
+        break;
     }
     console.log("Response", this.response);
     return {
