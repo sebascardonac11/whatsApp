@@ -4,7 +4,7 @@ module.exports = class whatsapp {
         this.TOKEN=token;
         this.WHATSAPPID=whatsappid;
     }
-    async sendMsj(number) {
+    async sendMsj(number, template) {
         try {
             const params = {
                 method: 'post',
@@ -17,11 +17,11 @@ module.exports = class whatsapp {
                     messaging_product: 'whatsapp',
                     to:  number,
                     type: 'template',
-                    template: { "name": "bienvenida", "language": { "code": "es" } }
+                    template: { "name": template, "language": { "code": "es" } }
                 }
             }
-            console.log(params);
-            return await axios(params);
+            //return await axios(params);
+            return params
         } catch (error) {
             console.log(error.response);
             return error;
