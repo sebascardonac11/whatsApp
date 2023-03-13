@@ -8,7 +8,7 @@ exports.handler = async function (event, context, callback) {
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response={'hub.challenge': '1423162681'}
+            this.response=event.queryStringParameters;
             /*this.response = {
                 'hub.challenge': '1423162681',
                 'hub.mode': 'subscribe',
