@@ -4,20 +4,24 @@ exports.handler = async function (event, context, callback) {
     console.log("Event: ", event);
     console.log("context: ", context);
     var whatsapp = new Whatsapp(process.env.TOKEN, process.env.WHATSAPPID);
-   // var response = await whatsapp.sendMsj('573147139879', "bienvenida");
+    // var response = await whatsapp.sendMsj('573147139879', "bienvenida");
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response = event.headers.queryStringParameters;//{"hub_mode":"subscribe","hub_challenge":process.env.WHATSAPPID,"hub_verify_token":"metawhatsapp"};
+            this.response = this.response = {
+                'hub.challenge': '1423162681',
+                'hub.mode': 'subscribe',
+                'hub.verify_token': 'metawhatsapp'
+            }
             break;
         default:
-        // code
-        this.response={
-            'hub.challenge': '1423162681',
-            'hub.mode': 'subscribe',
-            'hub.verify_token': 'metawhatsapp'
-          }
-        break;
+            // code
+            this.response = {
+                'hub.challenge': '1423162681',
+                'hub.mode': 'subscribe',
+                'hub.verify_token': 'metawhatsapp'
+            }
+            break;
     }
     console.log("Response", this.response);
     return {
