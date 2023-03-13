@@ -8,18 +8,18 @@ exports.handler = async function (event, context, callback) {
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response = this.response = {
-                'hub.challenge': '1423162681',
-                'hub.mode': 'subscribe',
-                'hub.verify_token': 'metawhatsapp'
+            this.response = {
+                'hub_challenge': '1423162681',
+                'hub_mode': 'subscribe',
+                'hub_verify_token': 'metawhatsapp'
             }
             break;
         default:
             // code
             this.response = {
-                'hub.challenge': '1423162681',
-                'hub.mode': 'subscribe',
-                'hub.verify_token': 'metawhatsapp'
+                'hub_challenge': '1423162681',
+                'hub_mode': 'subscribe',
+                'hub_verify_token': 'metawhatsapp'
             }
             break;
     }
