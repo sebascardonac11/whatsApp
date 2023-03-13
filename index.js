@@ -8,12 +8,8 @@ exports.handler = async function (event, context, callback) {
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response=event.queryStringParameters;
-            /*this.response = {
-                'hub.challenge': '1423162681',
-                'hub.mode': 'subscribe',
-                'hub.verify.token': 'metawhatsapp'
-            }*/
+            this.response=event.queryStringParameters.hub_challenge;
+        
             break;
         default:
             // code
