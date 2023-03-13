@@ -4,11 +4,12 @@ exports.handler = async function (event, context, callback) {
     console.log("Event: ", event);
     console.log("context: ", context);
     var whatsapp = new Whatsapp(process.env.TOKEN, process.env.WHATSAPPID);
+    var params=event.queryStringParameters;
     // var response = await whatsapp.sendMsj('573147139879', "bienvenida");
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response=event.queryStringParameters.hub_challenge;
+            this.response=params['hub_challenge'];
         
             break;
         default:
