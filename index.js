@@ -8,11 +8,12 @@ exports.handler = async function (event, context, callback) {
     //console.log(response);
     switch (event.httpMethod) {
         case 'GET':
-            this.response = {
-                'hub_challenge': '1423162681',
-                'hub_mode': 'subscribe',
-                'hub_verify_token': 'metawhatsapp'
-            }
+            this.response={'hub.challenge': '1423162681'}
+            /*this.response = {
+                'hub.challenge': '1423162681',
+                'hub.mode': 'subscribe',
+                'hub.verify.token': 'metawhatsapp'
+            }*/
             break;
         default:
             // code
@@ -25,6 +26,13 @@ exports.handler = async function (event, context, callback) {
     }
     console.log("Response", this.response);
     return {
-        statusCode: 200
+        statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT",
+            "Content-Type": 'application/json'
+        },
+        body: JSON.stringify(this.response)
     };
 }
