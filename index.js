@@ -29,6 +29,6 @@ exports.handler = async function (event, context, callback) {
             "Access-Control-Allow-Methods": "OPTIONS,POST,GET,PUT",
             "Content-Type": 'application/json'
         },
-        body: JSON.stringify(this.response)
+        body: this.response
     };
 }
