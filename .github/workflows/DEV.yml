@@ -32,10 +32,22 @@ jobs:
           aws lambda update-function-code \
             --function-name ${{ vars.LAMBDAWPNAME }} \
             --zip-fil "fileb://./deploy1.zip" \
+      - name: Build2
+        run: |
+          cd chat
+          npm install
+      - name: Deploy2
+        run: |
+          zip -r deploy2.zip ./chat
+          aws lambda update-function-code \
+            --function-name ${{ vars.LAMBDACHATNAME }} \
+            --zip-fil "fileb://./deploy2.zip" \
       - name: Updating Function 
         run: |
           sleep 10
       - name: Configutation
         run: |
           aws lambda update-function-configuration --function-name ${{ vars.LAMBDAWPNAME }} \
-            --environment "Variables={TOKEN=${{ secrets.WP_TOKEN}},WHATSAPPID=${{vars.WP_WHATSAPPID}}}" 
+            --environment "Variables={TOKEN=${{ secrets.WP_TOKEN}},WHATSAPPID=${{vars.WP_WHATSAPPID}}}"
+          aws lambda update-function-configuration --function-name ${{ vars.LAMBDACHATNAME }} \
+            --environment "Variables={TOKEN=${{ secrets.WP_TOKEN}},WHATSAPPID=${{vars.WP_WHATSAPPID}}}"             
