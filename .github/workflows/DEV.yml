@@ -37,5 +37,5 @@ jobs:
           sleep 10
       - name: Configutation
         run: |
-          aws lambda update-function-configuration --function-name ${{ secrets.LAMBDAFUNCNAME }} \
+          aws lambda update-function-configuration --function-name ${{ vars.LAMBDAFUNCNAME }} \
             --environment "Variables={TOKEN=${{ secrets.WP_TOKEN}},WHATSAPPID=${{vars.WP_WHATSAPPID}}}" 
