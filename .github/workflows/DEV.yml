@@ -28,9 +28,9 @@ jobs:
           npm install
       - name: Deploy
         run: |
-          zip -r deploy1.zip ./chat
+          zip -r deploy1.zip ./whatsapp
           aws lambda update-function-code \
-            --function-name ${{ secrets.LAMBDACHATNAME }} \
+            --function-name ${{ secrets.LAMBDAWPNAME }} \
             --zip-fil "fileb://./deploy1.zip" \
       - name: Updating Function 
         run: |
