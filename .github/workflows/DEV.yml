@@ -30,7 +30,7 @@ jobs:
         run: |
           zip -r deploy1.zip ./whatsapp
           aws lambda update-function-code \
-            --function-name ${{ secrets.LAMBDAWPNAME }} \
+            --function-name ${{ vars.LAMBDAWPNAME }} \
             --zip-fil "fileb://./deploy1.zip" \
       - name: Updating Function 
         run: |
