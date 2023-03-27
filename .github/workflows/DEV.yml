@@ -24,6 +24,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
       - name: Build
         run: |
+          cd whatsapp
           npm install
       - name: Deploy
         run: |

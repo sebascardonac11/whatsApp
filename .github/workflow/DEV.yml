@@ -25,6 +25,7 @@ jobs:
       - name: Build
         run: |
           cd whatsapp
+          npm ci
           npm install
       - name: Deploy
         run: |
