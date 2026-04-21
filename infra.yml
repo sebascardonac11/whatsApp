@@ -69,6 +69,12 @@ Resources:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunChatArn}/invocations
           - LambdaFunChatArn: !GetAtt LambdaChatFunction.Arn  
       PayloadFormatVersion: "1.0"
+  ConnectRouteSocket:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref APIWebSocketWhatsapp
+      RouteKey: $connect
+      Target: !Sub integrations/${WebSocketIntegration}  
   DefaultRouteSocket:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -83,9 +89,6 @@ Resources:
       Description: 'Api whatsapp'
       Parameters:
         endpointConfigurationTypes: REGIONAL
-      BinaryMediaTypes:
-        - image/jpeg
-        - multipart/form-data 
   APIGwResorceWhatsapps:
     Type: 'AWS::ApiGateway::Resource'
     Properties:
